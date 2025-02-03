@@ -1,0 +1,108 @@
+---
+title: "Project 1: Getting Started"
+subtitle: "MKTG 411 Marketing Analytics"
+output: 
+  ioslides_presentation:
+    widescreen: true
+    css: ../style.css
+---
+
+## Load Libraries 
+
+Let's load packages and import the data. Note that we are only demonstrating what we have already done to import the data from the database and using the Qualtrics API.
+
+```{r echo = TRUE, results = 'hide', message=FALSE}
+# Load packages.
+library(RPostgres)
+library(tidyverse)
+library(dbplyr)
+library(DBI)
+library(qualtRics)
+```
+
+## Setup Database Connection
+
+```{r}
+con <- dbConnect(
+  RPostgres::Postgres(),
+  dbname = "analyticsdb",
+  host = "analyticsdb.c5i8use80ktf.us-east-2.rds.amazonaws.com",
+  port = 5432,
+  user = "quantmktg",
+  password = rstudioapi::askForPassword("Database password")
+)
+
+dbListTables(con)
+```
+
+## Load Data from Database
+
+```{r}
+# Import online_transactions.
+online_transactions <- tbl(con, "online_transactions") |>
+  collect()
+
+# Import online_revenue.
+online_revenue <- tbl(con, "online_revenue") |>
+  collect()
+
+# Import customer_data.
+customer_data <- tbl(con, "customer_data") |>
+  collect()
+
+# Import store_revenue.
+store_revenue <- tbl(con, "store_revenue") |>
+  collect()
+
+# Import store_transactions.
+store_transactions <- tbl(con, "store_transactions") |>
+  collect()
+
+# Disconnect from the database.
+dbDisconnect(con)
+```
+
+## Qualtrics API Connection
+
+```{r}
+# Set qualtrics API credentials
+qualtRics::qualtrics_api_credentials(
+  api_key = "Ir2JDPvhOjSmMIpWo8bwVUAbvPs6uwGqIKipAuo6", 
+  base_url = "sjc1.qualtrics.com"
+)
+
+# Connect to API.
+survey_data <- fetch_survey("SV_0rn3HbR4AEc1BUG")
+```
+
+## Save Data Locally
+
+```{r}
+# Write data locally.
+write_csv(online_transactions, "online_transactions.csv")
+write_csv(online_revenue, "online_revenue.csv")
+write_csv(customer_data, "customer_data.csv")
+write_csv(store_revenue, "store_revenue.csv")
+write_csv(store_transactions, "store_transactions.csv")
+write_csv(survey_data, "survey_data.csv")
+```
+
+## Preventing Future Connections
+
+Use `#| eval: false` in the previous chunks to avoid connecting to the database and API when rendering your Quarto document.
+
+## Import Your Data
+
+```{r}
+# Import data.
+customer_data <- read_csv("customer_data.csv")
+store_transactions <- read_csv("store_transactions.csv")
+store_revenue <- read_csv("store_revenue.csv")
+online_transactions <- read_csv("online_transactions.csv")
+online_revenue <- read_csv("online_revenue.csv")
+survey_data <- read_csv("survey_data.csv")
+```
+
+## Your Turn!
+
+Answer the rest of the questions described in the project document. Ethan and I are here to answer questions.
